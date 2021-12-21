@@ -9,6 +9,12 @@ Plug 'junegunn/fzf.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'jparise/vim-graphql'
 Plug 'terryma/vim-expand-region'
+Plug 'vim-test/vim-test'
+Plug 'tpope/vim-surround'
+Plug 'prabirshrestha/vim-lsp'
+
+let test#javascript#ava#file_pattern = '\.test\.ts'
+let test#javascript#ava#executable = 'npm test --'
 call plug#end()
 
 set number
@@ -23,6 +29,16 @@ set termwinsize=15x0 " https://vi.stackexchange.com/a/25753
 set mouse=n
 
 source $HOME/.vim/init/coc.nvim
+
+" Bash language server: see https://github.com/bash-lsp/bash-language-server
+if executable('bash-language-server')
+  au User lsp_setup call lsp#register_server({
+        \ 'name': 'bash-language-server',
+        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'bash-language-server start']},
+        \ 'allowlist': ['sh'],
+        \ })
+endif
+"-----------------
 
 " https://shapeshed.com/vim-netrw/
 " let g:netrw_banner = 0
@@ -58,6 +74,10 @@ vnoremap K :m '<-2<CR>gv=gv
 " always in the same place
 nnoremap n nzz
 nnoremap N Nzz
+
+nnoremap <Leader>tl :TestLast<CR>
+nnoremap <Leader>ts :TestSuite<CR>
+nnoremap <Leader>tn :TestNearest<CR>
 
 set splitbelow
 set splitright

@@ -15,6 +15,7 @@ Plug 'prabirshrestha/vim-lsp'
 
 let test#javascript#ava#file_pattern = '\.test\.ts'
 let test#javascript#ava#executable = 'npm test --'
+" let test#strategy = "terminal"
 call plug#end()
 
 set number
@@ -27,6 +28,10 @@ set re=0 " https://jameschambers.co.uk/vim-typescript-slow
 let mapleader = ' '
 set termwinsize=15x0 " https://vi.stackexchange.com/a/25753
 set mouse=n
+
+" https://stackoverflow.com/a/2288438/2374361
+set ignorecase
+set smartcase
 
 source $HOME/.vim/init/coc.nvim
 

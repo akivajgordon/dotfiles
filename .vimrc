@@ -35,6 +35,9 @@ set smartcase
 
 source $HOME/.vim/init/coc.nvim
 
+" Configure coc.nvim to show an inverted view of highlight selection for code completion menu. See https://github.com/neoclide/coc.nvim/discussions/4035#discussioncomment-3363113
+hi! CocMenuSel ctermfg=7 ctermbg=0
+
 " Bash language server: see https://github.com/bash-lsp/bash-language-server
 if executable('bash-language-server')
   au User lsp_setup call lsp#register_server({

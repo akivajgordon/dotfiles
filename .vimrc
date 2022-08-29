@@ -78,6 +78,9 @@ nnoremap <C-H> <C-W><C-H>
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 
+" search for visually selected text: https://vim.fandom.com/wiki/Search_for_visually_selected_text
+vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
+
 " Searching for next will center the screen so that the searched context is
 " always in the same place
 nnoremap n nzz

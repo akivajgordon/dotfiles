@@ -1,11 +1,11 @@
 {
   "coc.preferences.formatOnSaveFiletypes": ["css", "markdown", "javascript", "typescript", "sh", "graphql", "json"],
   "languageserver": {
-    "graphql": {
-      "command": "graphql-lsp",
-      "args": ["server", "-m", "stream"],
-      "filetypes": ["typescript", "typescriptreact", "graphql"]
-    },
+    // "graphql": {
+    //   "command": "graphql-lsp",
+    //   "args": ["server", "-m", "stream"],
+    //   "filetypes": ["typescript", "typescriptreact", "graphql", "javascript"]
+    // },
     "bash": {
       "command": "bash-language-server",
       "args": ["start"],

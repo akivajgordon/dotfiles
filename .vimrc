@@ -25,7 +25,7 @@ Plug 'tpope/vim-surround'
 Plug 'prabirshrestha/vim-lsp'
 
 let test#javascript#ava#file_pattern = '\.test\.ts'
-let test#javascript#ava#executable = 'npm test --'
+let test#javascript#ava#executable = 'NODE_ENV=development npm test --'
 " let test#strategy = "terminal"
 call plug#end()
 

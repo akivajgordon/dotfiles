@@ -1,0 +1,8 @@
+[editor]
+line-number = "relative"
+idle-timeout = 0
+completion-trigger-len = 1
+color-modes = true
+
+[editor.cursor-shape]
+insert = "bar"

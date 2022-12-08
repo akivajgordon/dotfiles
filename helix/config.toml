@@ -6,3 +6,8 @@ color-modes = true
 
 [editor.cursor-shape]
 insert = "bar"
+
+[keys.insert]
+C-f = "move_char_right"
+C-b = "move_char_left"
+j = { k = "normal_mode" }

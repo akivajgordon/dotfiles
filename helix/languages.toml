@@ -1,7 +1,14 @@
 [[language]]
 name = "typescript"
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"] }
+formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
+
+[[language]]
+name = "swift"
+scope = "source.swift"
+file-types = ["swift"]
+auto-format = true
+formatter = { command = "swift-format" }
 
 # https://github.com/helix-editor/helix/issues/2070#issuecomment-1433195804 <<-INLAY_HINTS_CONFIG start
 [[language]]

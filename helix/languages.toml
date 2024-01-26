@@ -1,67 +1,19 @@
 [[language]]
 name = "typescript"
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"] }
-
-# https://github.com/helix-editor/helix/issues/2070#issuecomment-1433195804 <<-INLAY_HINTS_CONFIG start
-[[language]]
-name = "typescript"
-
-[language.config]
-hostInfo = "helix"
-
-[language.config.typescript.inlayHints]
-includeInlayEnumMemberValueHints = true
-includeInlayFunctionLikeReturnTypeHints = true
-includeInlayFunctionParameterTypeHints = true
-includeInlayParameterNameHints = "all"                       # 'none' | 'literals' | 'all';
-includeInlayParameterNameHintsWhenArgumentMatchesName = true
-includeInlayPropertyDeclarationTypeHints = true
-includeInlayVariableTypeHints = true
-
-[[language]]
-name = "tsx"
-
-[language.config]
-hostInfo = "helix"
-
-[language.config.typescript.inlayHints]
-includeInlayEnumMemberValueHints = true
-includeInlayFunctionLikeReturnTypeHints = true
-includeInlayFunctionParameterTypeHints = true
-includeInlayParameterNameHints = "all"                       # 'none' | 'literals' | 'all';
-includeInlayParameterNameHintsWhenArgumentMatchesName = true
-includeInlayPropertyDeclarationTypeHints = true
-includeInlayVariableTypeHints = true
-
-[[language]]
-name = "javascript"
-
-[language.config]
-hostInfo = "helix"
-
-[language.config.javascript.inlayHints]
-includeInlayEnumMemberValueHints = true
-includeInlayFunctionLikeReturnTypeHints = true
-includeInlayFunctionParameterTypeHints = true
-includeInlayParameterNameHints = "all"                       # 'none' | 'literals' | 'all';
-includeInlayParameterNameHintsWhenArgumentMatchesName = true
-includeInlayPropertyDeclarationTypeHints = true
-includeInlayVariableTypeHints = true
-
-# INLAY_HINTS_CONFIG end --------
+formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
 
 [[language]]
 name = "tsx"
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"]}
+formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
 
 [[language]]
 name = "javascript"
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"] }
+formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
 
 [[language]]
 name = "css"
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "css"] }
+formatter = { command = "npx", args = ["prettier", "--parser", "css"] }

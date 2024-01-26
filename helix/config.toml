@@ -21,6 +21,16 @@ C-b = "move_char_left"
 j = { k = "normal_mode" }
 
 [keys.normal]
-minus = { r = ":config-reload", g = ":sh git status", e = ":o .env", t = ":o ~/.config/helix/themes/akiva.toml", d = ["vsplit", "goto_definition"], o = ":sh NODE_ENV=development npm test -- $(rg --files-with-matches 'test.only' test)" }
+
 C-j = ['extend_to_line_bounds', 'delete_selection', 'move_line_down', 'paste_before', ":format"]
 C-k = ['extend_to_line_bounds', 'delete_selection', 'move_line_up', 'paste_before', ":format"]
+
+[keys.normal.minus]
+
+r = ":config-reload"
+g = ":sh git status"
+e = ":o .env"
+t = ":o ~/.config/helix/themes/akiva.toml"
+d = ["vsplit", "goto_definition"]
+o = ["vsplit_new", ":insert-output NODE_ENV=development npm test -- $(rg --files-with-matches 'test.only' test) || true", "collapse_selection", ":lang typescript"]
+O = ["vsplit_new", ":insert-output NODE_ENV=development npm test -- $(rg --files-with-matches '#only' test) || true", "collapse_selection", ":lang typescript"]

@@ -76,7 +76,8 @@ compctl -K _completemarks unmark
 
 ########
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+## Set up fzf shell integration
+source <(fzf --zsh)
 
 ########
 

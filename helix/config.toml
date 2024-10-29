@@ -22,6 +22,7 @@ j = { k = "normal_mode" }
 
 [keys.normal.minus]
 
+c = ":config-open"
 C-j = ['extend_to_line_bounds', 'delete_selection', 'move_line_down', 'paste_before', ":format"]
 C-k = ['extend_to_line_bounds', 'delete_selection', 'move_line_up', 'paste_before', ":format"]
 r = ":config-reload"
@@ -31,4 +32,10 @@ t = ":o ~/.config/helix/themes/akiva.toml"
 d = ["vsplit", "goto_definition"]
 o = ["vsplit_new", ":insert-output NODE_ENV=development npm test -- $(rg --files-with-matches 'test.only' test) || true", "collapse_selection", ":lang typescript"]
 O = ["vsplit_new", ":insert-output NODE_ENV=development npm test -- $(rg --files-with-matches '#only' test) || true", "collapse_selection", ":lang typescript"]
-l = ["extend_to_line_bounds", ":append-output echo \"logger.info('$(date | md5 | head -c 8)')\""]
+
+[keys.normal.minus.l]
+i = ["extend_to_line_bounds", ":append-output echo \"logger.info('$(date | md5 | head -c 8)')\"; echo"]
+t = ["extend_to_line_bounds", ":append-output echo \"logger.trace('$(date | md5 | head -c 8)')\"; echo"]
+d = ["extend_to_line_bounds", ":append-output echo \"logger.debug('$(date | md5 | head -c 8)')\"; echo"]
+w = ["extend_to_line_bounds", ":append-output echo \"logger.warn('$(date | md5 | head -c 8)')\"; echo"]
+e = ["extend_to_line_bounds", ":append-output echo \"logger.error('$(date | md5 | head -c 8)')\"; echo"]

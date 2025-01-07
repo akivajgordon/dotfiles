@@ -5,6 +5,7 @@ line-number = "relative"
 idle-timeout = 0
 completion-trigger-len = 1
 color-modes = true
+end-of-line-diagnostics = "hint"
 
 [editor.cursor-shape]
 insert = "bar"
@@ -14,6 +15,9 @@ enable = true
 
 [editor.lsp]
 display-inlay-hints = false
+
+[editor.inline-diagnostics]
+cursor-line = "warning" # show warnings and errors on the cursorline inline
 
 [keys.insert]
 C-f = "move_char_right"

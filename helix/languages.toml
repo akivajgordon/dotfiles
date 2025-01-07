@@ -17,3 +17,22 @@ formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
 name = "css"
 auto-format = true
 formatter = { command = "npx", args = ["prettier", "--parser", "css"] }
+
+[[language]]
+name = "python"
+language-servers = ["pylsp"]
+auto-format = true
+
+[language-server.pylsp.config.pylsp]
+plugins.ruff.enabled = true
+plugins.black.enabled = true
+
+
+# [language-server.pylsp.config.pylsp]
+# plugins.black.enabled = true
+# plugins.pylsp_mypy.enabled = true
+# plugins.pylsp_mypy.live_mode = true
+# plugins.pylint.enabled = true
+# plugins.pyflakes.enabled = false
+# plugins.isort.enabled = true
+# plugins.rope_autoimport.enabled = true

@@ -13,6 +13,11 @@ export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 
 alias branch="git rev-parse --abbrev-ref HEAD"
+alias py="python3"
+
+if command -v ngrok &>/dev/null; then
+  eval "$(ngrok completion)"
+fi
 
 edit() {
     local files=$(git status -s | awk '{print $2}')
@@ -34,6 +39,34 @@ edit() {
     else
         $EDITOR
     fi
+}
+
+# Function to stash all changes except the selected ones
+function git_stash_exclude() {
+  # Get the list of changed files
+  local files=($(git status --porcelain=v1 | awk '{print $2}'))
+  
+  # Use fzf to select files to exclude from stashing
+  local exclude=($(printf "%s\n" "${files[@]}" | fzf --multi --preview 'git diff --color=always -- "{}"'))
+  
+  if [[ -z "$exclude" ]]; then
+    echo "No files selected to exclude. Stashing everything."
+    git stash -u
+    return
+  fi
+
+  # Temporarily stash all changes
+  git stash -u
+
+  # Reapply changes for excluded files
+  for file in "${exclude[@]}"; do
+    git stash pop --quiet
+    git checkout stash@{0} -- "$file"
+  done
+
+  # Remove the stash entry if it's empty
+  git stash drop --quiet
+  echo "Stashed all changes except: ${exclude[*]}"
 }
 
 
@@ -88,3 +121,10 @@ export NVM_DIR="$HOME/.nvm"
 # Execute config local to this machine
 [ -s "$HOME/.zsh/local.zsh" ] && \. "$HOME/.zsh/local.zsh"
 
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/akiva/.cache/lm-studio/bin"
+
+# Created by `pipx` on 2024-12-29 03:48:41
+export PATH="$PATH:/Users/akiva/.local/bin"

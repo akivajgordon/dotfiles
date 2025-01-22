@@ -19,6 +19,11 @@ auto-format = true
 formatter = { command = "npx", args = ["prettier", "--parser", "css"] }
 
 [[language]]
+name = "json"
+auto-format = true
+formatter = { command = "npx", args = ["prettier", "--parser", "json"] }
+
+[[language]]
 name = "python"
 language-servers = ["pylsp"]
 auto-format = true

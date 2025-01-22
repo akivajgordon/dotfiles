@@ -24,6 +24,10 @@ C-f = "move_char_right"
 C-b = "move_char_left"
 j = { k = "normal_mode" }
 
+[keys.normal]
+C-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
+C-k = ["extend_to_line_bounds", "delete_selection", "move_line_up", "paste_before"]
+
 [keys.normal.minus]
 
 c = ":config-open"

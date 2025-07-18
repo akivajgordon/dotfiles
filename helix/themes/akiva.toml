@@ -1,4 +1,4 @@
 inherits = "base16_default"
 
-# "variable" = "blue"
-# "ui.highlight" = { bg = "#000000" }
+# https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#256-colors
+"ui.highlight" = { bg = "239" } # 239 = dim greyish

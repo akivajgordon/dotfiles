@@ -128,3 +128,5 @@ export PATH="$PATH:/Users/akiva/.cache/lm-studio/bin"
 
 # Created by `pipx` on 2024-12-29 03:48:41
 export PATH="$PATH:/Users/akiva/.local/bin"
+
+export PATH="$HOME/bin:$PATH"

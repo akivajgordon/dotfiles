@@ -69,6 +69,56 @@ function git_stash_exclude() {
   echo "Stashed all changes except: ${exclude[*]}"
 }
 
+pipinstall() {
+  # If no args: install from requirements-dev.txt (or requirements.txt)
+  if [ $# -eq 0 ]; then
+    if [ -f requirements-dev.txt ]; then
+      pip install -r requirements-dev.txt
+    elif [ -f requirements.txt ]; then
+      pip install -r requirements.txt
+    else
+      echo "⚠️ No requirements.txt or requirements-dev.txt found."
+    fi
+    return
+  fi
+
+  # Determine file and package
+  if [ "$1" = "--dev" ]; then
+    pkg=$2
+    file=requirements-dev.txt
+  else
+    pkg=$1
+    file=requirements.txt
+  fi
+
+  # Ensure requirements file exists
+  if [ ! -f "$file" ]; then
+    touch "$file"
+    echo "📝 Created $file"
+    if [ "$file" = "requirements-dev.txt" ] && [ -f requirements.txt ]; then
+      echo "-r requirements.txt" >> "$file"
+      echo "➕ Linked to requirements.txt"
+    fi
+  fi
+
+  # Install/upgrade the package
+  pip install -U "$pkg" || return 1
+
+  # Get exact frozen version line
+  line=$(pip freeze | grep -i "^$pkg==")
+
+  # Replace or append
+  if grep -i "^$pkg==" "$file" > /dev/null 2>&1; then
+    # zsh/macOS compatible in-place replace
+    sed -i '' "/^$(echo $pkg | sed 's/\./\\./g')==/Id" "$file"
+    echo "$line" >> "$file"
+    echo "🔄 Updated $pkg in $file → $line"
+  else
+    echo "$line" >> "$file"
+    echo "➜ Added $line to $file"
+  fi
+}
+
 
 # git
 zstyle ':completion:*:*:git:*' script ~/.git-completion.zsh

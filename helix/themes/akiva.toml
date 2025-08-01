@@ -2,3 +2,6 @@ inherits = "base16_default"
 
 # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#256-colors
 "ui.highlight" = { bg = "239" } # 239 = dim greyish
+"ui.background" = "terminal"
+"ui.gutter" = { bg = "terminal"}
+"ui.linenr" = { bg = "terminal", fg = "comet" }

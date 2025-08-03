@@ -14,6 +14,7 @@ export LSCOLORS=ExFxBxDxCxegedabagacad
 
 alias branch="git rev-parse --abbrev-ref HEAD"
 alias py="python3"
+alias venv="source .venv/bin/activate"
 
 if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"

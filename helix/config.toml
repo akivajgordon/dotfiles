@@ -25,16 +25,22 @@ C-b = "move_char_left"
 j = { k = "normal_mode" }
 
 [keys.normal]
-C-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
-C-k = ["extend_to_line_bounds", "delete_selection", "move_line_up", "paste_before"]
+C-A-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
+C-A-k = ["extend_to_line_bounds", "delete_selection", "move_line_up", "paste_before"]
+
+C-h = "jump_view_left"
+C-j = "jump_view_down"
+C-k = "jump_view_up"
+C-l = "jump_view_right"
+
 D = ["vsplit_new", ":set-language diff", ":insert-output git diff", "collapse_selection", "goto_file_start"]
 B = ":sh git log -n 5 --format='format:%%h (%%an: %%ar) %%s' --no-patch -L%{cursor_line},+1:%{buffer_name}"
 # B = ":sh echo %sh{git show --no-patch --format='%%h (%%an: %%ar): %%s' $(git blame -p %{buffer_name} -L%{cursor_line},+1 | head -1 | cut -d' ' -f1)}"
 
 [keys.normal.minus]
 
-C-j = ['extend_to_line_bounds', 'delete_selection', 'move_line_down', 'paste_before', ":format"]
-C-k = ['extend_to_line_bounds', 'delete_selection', 'move_line_up', 'paste_before', ":format"]
+# C-j = ['extend_to_line_bounds', 'delete_selection', 'move_line_down', 'paste_before', ":format"]
+# C-k = ['extend_to_line_bounds', 'delete_selection', 'move_line_up', 'paste_before', ":format"]
 g = ":sh git status"
 e = ":o .env"
 d = ["vsplit", "goto_definition"]

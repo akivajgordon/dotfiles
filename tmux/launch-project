@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# This script starts a new (or changes to an active) tmux session
+# with a vertical divider for two panes:
+#
+# [Left]: shell in working directory, and [Right]: Editor open
+
+# Default values
+SESSION=""
+DIR=""
+
+# Parse args
+while [[ "$1" == --* ]]; do
+  case "$1" in
+    --name)
+      SESSION="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# The remaining argument is the directory (required)
+DIR="$1"
+if [[ -z "$DIR" ]]; then
+  echo "Usage: $0 [--name session_name] <path>"
+  exit 1
+fi
+
+# If session name not provided, use base name of the directory
+if [[ -z "$SESSION" ]]; then
+  SESSION=$(basename "$DIR")
+fi
+
+# Check if session exists
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  tmux attach -t "$SESSION"
+  exit 0
+fi
+
+EDITOR_COMMAND="${EDITOR} ."
+
+tmux new-session -d -s "$SESSION" -c "$DIR"
+tmux split-window -h -c "$DIR"
+tmux send-keys -t "$SESSION":0.1 "$EDITOR_COMMAND" C-m
+tmux select-pane -t 1
+tmux attach -t "$SESSION"

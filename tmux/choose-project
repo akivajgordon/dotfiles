@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECTS_FILE="$HOME/.projects.json"
+LAUNCH_PROJECT="$HOME/dotfiles/tmux/launch-project"
+
+# Check for projects file
+if [[ ! -f "$PROJECTS_FILE" ]]; then
+  echo "Error: $PROJECTS_FILE not found. Please create it to use proj." >&2
+  exit 1
+fi
+
+# Select project
+choice=$(jq -r '.[].display_name' "$PROJECTS_FILE" | fzf) || exit 1
+
+# Extract fields
+session_name=$(jq -r --arg d "$choice" '.[] | select(.display_name==$d) | .session_name' "$PROJECTS_FILE")
+proj_path=$(jq -r --arg d "$choice" '.[] | select(.display_name==$d) | .path' "$PROJECTS_FILE")
+
+# Expand ~ to $HOME
+expanded_path="${proj_path/#\~/$HOME}"
+
+# Expand literal $HOME at start of string
+if [[ "$expanded_path" == '$HOME'* ]]; then
+    expanded_path="${HOME}${expanded_path#\$HOME}"
+fi
+
+# Launch
+"$LAUNCH_PROJECT" --name "$session_name" "$expanded_path"

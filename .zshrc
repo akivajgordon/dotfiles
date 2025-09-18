@@ -16,6 +16,10 @@ alias branch="git rev-parse --abbrev-ref HEAD"
 alias py="python3"
 alias venv="source .venv/bin/activate"
 
+create-react-app() {
+  npm create vite@latest "$1" -- --template react-ts
+}
+
 if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi

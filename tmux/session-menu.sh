@@ -13,8 +13,9 @@ result=$(echo "$sessions" | fzf \
     --reverse \
     --no-info)
 
-# Exit if user cancelled (Ctrl-C or Esc)
-[ $? -ne 0 ] && exit 0
+# Exit if user cancelled (Ctrl-C), but allow "no match" (exit code 1)
+exit_code=$?
+[ $exit_code -eq 130 ] && exit 0
 
 # Parse result: first line is query, second line (if exists) is selection
 query=$(echo "$result" | sed -n '1p')

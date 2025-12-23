@@ -46,7 +46,10 @@ e = ":o .env"
 d = ["vsplit", "goto_definition"]
 o = ["vsplit_new", ":insert-output NODE_ENV=development npm test -- $(rg --files-with-matches 'test.only' test) || true", "collapse_selection", ":lang typescript"]
 O = ["vsplit_new", ":insert-output NODE_ENV=development npm test -- $(rg --files-with-matches '#only' test) || true", "collapse_selection", ":lang typescript"]
-s = "@miw h"
+# s = "@miw h"
+
+# Scooter: TUI find and replace (https://github.com/thomasschafer/scooter)
+s = ":sh tmux popup -xC -yC -w90%% -h90%% -E scooter"
 
 [keys.normal.minus.c]
 

@@ -64,3 +64,8 @@ t = ["extend_to_line_bounds", ":append-output echo \"logger.trace('$(date | md5 
 d = ["extend_to_line_bounds", ":append-output echo \"logger.debug('$(date | md5 | head -c 8)')\"; echo"]
 w = ["extend_to_line_bounds", ":append-output echo \"logger.warn('$(date | md5 | head -c 8)')\"; echo"]
 e = ["extend_to_line_bounds", ":append-output echo \"logger.error('$(date | md5 | head -c 8)')\"; echo"]
+
+[keys.normal.minus.t]
+s = ":! ~/bin/testrunner.sh"
+f = ":! ~/bin/testrunner.sh \"%{buffer_name}\""
+p = ":! ~/bin/testrunner.sh --pick"

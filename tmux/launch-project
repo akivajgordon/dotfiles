@@ -35,9 +35,19 @@ if [[ -z "$SESSION" ]]; then
   SESSION=$(basename "$DIR")
 fi
 
+# Detect if we're inside tmux
+INSIDE_TMUX=0
+if [ -n "$TMUX" ]; then
+  INSIDE_TMUX=1
+fi
+
 # Check if session exists
 if tmux has-session -t "$SESSION" 2>/dev/null; then
-  tmux attach -t "$SESSION"
+  if [ $INSIDE_TMUX -eq 1 ]; then
+    tmux switch-client -t "$SESSION"
+  else
+    tmux attach -t "$SESSION"
+  fi
   exit 0
 fi
 
@@ -47,4 +57,9 @@ tmux new-session -d -s "$SESSION" -c "$DIR"
 tmux split-window -h -c "$DIR"
 tmux send-keys -t "$SESSION":0.1 "$EDITOR_COMMAND" C-m
 tmux select-pane -t 1
-tmux attach -t "$SESSION"
+
+if [ $INSIDE_TMUX -eq 1 ]; then
+  tmux switch-client -t "$SESSION"
+else
+  tmux attach -t "$SESSION"
+fi

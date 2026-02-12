@@ -1,27 +1,32 @@
 [[language]]
 name = "typescript"
 auto-format = true
-formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
+formatter = { command = "npx", args = ["--offline", "prettier", "--parser", "typescript"] }
 
 [[language]]
 name = "tsx"
 auto-format = true
-formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
+formatter = { command = "npx", args = ["--offline", "prettier", "--parser", "typescript"] }
 
 [[language]]
 name = "javascript"
 auto-format = true
-formatter = { command = "npx", args = ["prettier", "--parser", "typescript"] }
+formatter = { command = "npx", args = ["--offline", "prettier", "--parser", "typescript"] }
 
 [[language]]
 name = "css"
 auto-format = true
-formatter = { command = "npx", args = ["prettier", "--parser", "css"] }
+formatter = { command = "npx", args = ["--offline", "prettier", "--parser", "css"] }
 
 [[language]]
 name = "json"
 auto-format = true
-formatter = { command = "npx", args = ["prettier", "--parser", "json"] }
+formatter = { command = "npx", args = ["--offline", "prettier", "--parser", "json"] }
+
+[[language]]
+name = "swift"
+auto-format = true
+formatter = { command = "swift-format", args = ["format"] }
 
 [[language]]
 name = "python"

@@ -37,6 +37,7 @@ auto-format = true
 
 [language-server.pyright]
 command = "pyright-langserver"
+config.python.pythonPath = ".venv/bin/python" # this loads the venv when starting the LSP so that you don't have to be in a venv when starting up helix
 args = ["--stdio"]
 
 # [language-server.pylsp.config.pylsp]
@@ -53,3 +54,9 @@ args = ["--stdio"]
 # plugins.pyflakes.enabled = false
 # plugins.isort.enabled = true
 # plugins.rope_autoimport.enabled = true
+#
+
+[[language]]
+name = "swift"
+shebangs = ["swift"]
+auto-format = true

@@ -37,6 +37,8 @@ D = ["vsplit_new", ":set-language diff", ":insert-output git diff", "collapse_se
 B = ":sh git log -n 5 --format='format:%%h (%%an: %%ar) %%s' --no-patch -L%{cursor_line},+1:%{buffer_name}"
 # B = ":sh echo %sh{git show --no-patch --format='%%h (%%an: %%ar): %%s' $(git blame -p %{buffer_name} -L%{cursor_line},+1 | head -1 | cut -d' ' -f1)}"
 
+Y = ":yank-join"
+
 [keys.normal.minus]
 
 # C-j = ['extend_to_line_bounds', 'delete_selection', 'move_line_down', 'paste_before', ":format"]

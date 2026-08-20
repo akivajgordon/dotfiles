@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+"""Render local branches as a dependency tree, like `tree` but for branch lineage.
+
+Git records no parentage for branches -- a branch is just a SHA -- so lineage is
+reconstructed from the commit DAG:
+
+  * B's parent is the closest branch whose tip is an ancestor of B's tip
+    ("closest" = fewest commits B has that it doesn't).  These edges are exact.
+  * If no branch tip is an ancestor (you forked, then the base moved on and you
+    never merged it back in), fall back to the branch sharing the most recent
+    fork point.  These edges are approximate and marked with `~`.
+
+Usage: git branch-tree [-C <repo>] [--merged] [--dates] [--ascii] [--no-color]
+"""
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+from collections import defaultdict
+
+TRUNKS = ("main", "master", "dev", "develop", "trunk")
+BRANCH_LIMIT = 400
+
+
+class Color:
+    def __init__(self, on):
+        self.on = on
+
+    def __call__(self, code, text):
+        return f"\033[{code}m{text}\033[0m" if self.on else text
+
+    def dim(self, t):
+        return self("2", t)
+
+    def bold(self, t):
+        return self("1", t)
+
+    def green(self, t):
+        return self("32", t)
+
+    def yellow(self, t):
+        return self("33", t)
+
+    def red(self, t):
+        return self("31", t)
+
+    def cyan(self, t):
+        return self("36", t)
+
+
+def git(args, repo):
+    res = subprocess.run(
+        ["git", "-C", repo] + args,
+        capture_output=True,
+        text=True,
+    )
+    if res.returncode != 0:
+        sys.exit(f"git {' '.join(args)} failed: {res.stderr.strip()}")
+    return res.stdout
+
+
+class Branch:
+    def __init__(self, idx, name, sha, upstream, track, date, is_head):
+        self.idx = idx
+        self.name = name
+        self.sha = sha
+        self.upstream = upstream
+        self.date = date
+        self.is_head = is_head
+        self.ahead, self.behind = parse_track(track)
+        self.parent = None
+        self.exact = True  # False => inferred from a diverged fork point
+        self.children = []
+        self.worktree = None
+        self.merged_into = None
+
+
+def parse_track(track):
+    """'[ahead 82, behind 3]' -> (82, 3); '' or '[gone]' -> (0, 0)."""
+    if not track:
+        return 0, 0
+    ahead = re.search(r"ahead (\d+)", track)
+    behind = re.search(r"behind (\d+)", track)
+    return (int(ahead.group(1)) if ahead else 0, int(behind.group(1)) if behind else 0)
+
+
+def load_branches(repo):
+    fmt = "%09".join(
+        [
+            "%(refname:short)",
+            "%(objectname)",
+            "%(upstream:short)",
+            "%(upstream:track)",
+            "%(committerdate:relative)",
+            "%(HEAD)",
+        ]
+    )
+    out = git(["for-each-ref", "--format=" + fmt, "refs/heads/"], repo)
+    branches = []
+    for line in out.splitlines():
+        name, sha, upstream, track, date, head = line.split("\t")
+        branches.append(
+            Branch(len(branches), name, sha, upstream, track, date, head == "*")
+        )
+    return branches
+
+
+def load_worktrees(repo):
+    """branch name -> worktree path, for branches checked out elsewhere."""
+    out = git(["worktree", "list", "--porcelain"], repo)
+    result, path = {}, None
+    for line in out.splitlines():
+        if line.startswith("worktree "):
+            path = line[len("worktree ") :]
+        elif line.startswith("branch refs/heads/"):
+            result[line[len("branch refs/heads/") :]] = path
+    return result
+
+
+def ahead_matrix(repo, branches):
+    """ahead[i][j] = commits reachable from branch i but not from branch j.
+
+    Computed in one pass: walk every commit reachable from a local branch in
+    topological order, propagating a bitmask of which tips can reach it, then
+    bucket commits by mask.  One `git rev-list` instead of O(n^2) merge-bases.
+    """
+    n = len(branches)
+    mask = {}
+    for b in branches:
+        mask[b.sha] = mask.get(b.sha, 0) | (1 << b.idx)
+
+    out = git(["rev-list", "--topo-order", "--parents", "--branches"], repo)
+    buckets = defaultdict(int)
+    for line in out.splitlines():
+        shas = line.split()
+        m = mask.pop(shas[0], 0)
+        buckets[m] += 1
+        for parent in shas[1:]:
+            mask[parent] = mask.get(parent, 0) | m
+
+    ahead = [[0] * n for _ in range(n)]
+    for m, count in buckets.items():
+        if not m:
+            continue
+        inside = [i for i in range(n) if m >> i & 1]
+        if len(inside) == n:
+            continue  # reachable from everything -- contributes to no pair
+        outside = [j for j in range(n) if not m >> j & 1]
+        for i in inside:
+            row = ahead[i]
+            for j in outside:
+                row[j] += count
+    return ahead
+
+
+def trunk_rank(name):
+    base = name.split("/")[-1]
+    for rank, t in enumerate(TRUNKS):
+        if name == t or base == t:
+            return rank
+    return len(TRUNKS)
+
+
+def assign_parents(branches, ahead, trunk):
+    """Closest true ancestor wins; otherwise nearest diverged branch.
+
+    The trunk is always a root, and a branch already merged into the trunk is
+    always a leaf -- otherwise an old merged release branch, whose tip really is
+    an ancestor of the trunk, would end up parenting the whole tree.
+    """
+    for b in branches:
+        if b is trunk:
+            continue
+        i = b.idx
+        exact, fuzzy = [], []
+        for other in branches:
+            j = other.idx
+            if i == j or ahead[i][j] == 0:
+                continue  # same tip, or b is contained in other (other is a descendant)
+            if other.merged_into and not b.merged_into:
+                continue  # a merged branch never parents live work
+            if b.merged_into and not other.merged_into:
+                continue  # keep merged branches among themselves, then fall back to trunk
+            key = (ahead[i][j], trunk_rank(other.name), ahead[j][i], other.name)
+            (exact if ahead[j][i] == 0 else fuzzy).append((key, other))
+        pool = exact or fuzzy
+        if pool:
+            b.parent = min(pool, key=lambda kv: kv[0])[1]
+            b.exact = bool(exact)
+        elif b.merged_into:
+            b.parent = trunk
+
+
+def break_cycles(branches):
+    """Fuzzy edges can point at each other; keep the tree a tree."""
+    for b in branches:
+        seen, node = set(), b
+        while node.parent is not None:
+            if node.idx in seen:
+                node.parent, node.exact = None, True
+                break
+            seen.add(node.idx)
+            node = node.parent
+
+
+def classify_merged(branches, ahead, trunk):
+    """A branch with nothing the trunk lacks is fully merged."""
+    if trunk is None:
+        return
+    for b in branches:
+        if b is not trunk and ahead[b.idx][trunk.idx] == 0:
+            b.merged_into = trunk.name
+
+
+def annotate(b, ahead, c, show_dates):
+    bits = []
+    if b.parent is not None:
+        gap = ahead[b.idx][b.parent.idx]
+        if gap:
+            bits.append(c.green(f"+{gap}"))
+    if not b.upstream:
+        bits.append(c.dim("no upstream"))
+    elif b.ahead or b.behind:
+        sync = ""
+        if b.ahead:
+            sync += c.yellow(f"^{b.ahead}")
+        if b.behind:
+            sync += (" " if sync else "") + c.red(f"v{b.behind}")
+        bits.append(sync)
+    if b.merged_into:
+        bits.append(c.cyan(f"merged into {b.merged_into}"))
+    if b.worktree:
+        bits.append(c.cyan(f"wt:{os.path.basename(b.worktree)}"))
+    if show_dates:
+        bits.append(c.dim(b.date))
+    return "  ".join(bits)
+
+
+def visible_len(s):
+    return len(re.sub(r"\033\[[0-9;]*m", "", s))
+
+
+def render(roots, ahead, c, show_dates, ascii_only):
+    rows = []  # (label, branch)
+    tee, elbow, pipe = ("|-- ", "`-- ", "|   ") if ascii_only else ("├── ", "└── ", "│   ")
+
+    def walk(b, prefix, is_last, is_root):
+        if is_root:
+            label = ""
+        else:
+            label = prefix + (elbow if is_last else tee)
+            prefix = prefix + ("    " if is_last else pipe)
+        name = c.bold(c.green("* " + b.name)) if b.is_head else b.name
+        if not b.exact and b.parent is not None:
+            name = c.dim("~") + name
+        rows.append((label + name, b))
+        kids = sorted(b.children, key=lambda k: (trunk_rank(k.name), k.name))
+        for i, kid in enumerate(kids):
+            walk(kid, prefix, i == len(kids) - 1, False)
+
+    for root in roots:
+        walk(root, "", True, True)
+
+    width = max((visible_len(label) for label, _ in rows), default=0)
+    lines = []
+    for label, b in rows:
+        note = annotate(b, ahead, c, show_dates)
+        lines.append(f"{label}{' ' * (width - visible_len(label) + 2)}{note}".rstrip())
+    return lines
+
+
+def main():
+    ap = argparse.ArgumentParser(add_help=True, description=__doc__)
+    ap.add_argument("-C", dest="repo", default=".", help="repository path")
+    ap.add_argument(
+        "--merged",
+        action="store_true",
+        help="include branches fully merged into the trunk",
+    )
+    ap.add_argument("--dates", action="store_true", help="show last-commit dates")
+    ap.add_argument("--no-color", action="store_true")
+    ap.add_argument("--ascii", action="store_true", help="ASCII tree glyphs instead of box drawing")
+    args = ap.parse_args()
+
+    repo = git(["rev-parse", "--show-toplevel"], args.repo).strip()
+    c = Color(sys.stdout.isatty() and not args.no_color and os.environ.get("TERM") != "dumb")
+
+    branches = load_branches(repo)
+    if not branches:
+        sys.exit("no local branches")
+    if len(branches) > BRANCH_LIMIT:
+        sys.exit(f"{len(branches)} local branches exceeds the {BRANCH_LIMIT} limit")
+
+    worktrees = load_worktrees(repo)
+    for b in branches:
+        wt = worktrees.get(b.name)
+        if wt and wt != repo:
+            b.worktree = wt
+
+    ahead = ahead_matrix(repo, branches)
+
+    trunk = min(branches, key=lambda b: (trunk_rank(b.name), b.name))
+    if trunk_rank(trunk.name) == len(TRUNKS):
+        trunk = None
+    classify_merged(branches, ahead, trunk)
+
+    assign_parents(branches, ahead, trunk)
+    break_cycles(branches)
+
+    shown = [b for b in branches if args.merged or not b.merged_into]
+    visible = {b.idx for b in shown}
+    for b in shown:
+        # re-anchor onto the nearest visible ancestor when parents are hidden
+        p = b.parent
+        while p is not None and p.idx not in visible:
+            p = p.parent
+        b.parent = p
+    for b in shown:
+        if b.parent is not None:
+            b.parent.children.append(b)
+
+    roots = sorted(
+        (b for b in shown if b.parent is None), key=lambda b: (trunk_rank(b.name), b.name)
+    )
+    plural = "branch" if len(branches) == 1 else "branches"
+    print(f"{c.bold(os.path.basename(repo))}  {c.dim(f'{len(branches)} local {plural}')}")
+    print()
+    for line in render(roots, ahead, c, args.dates, args.ascii):
+        print(line)
+
+    hidden = len(branches) - len(shown)
+    if hidden:
+        print()
+        print(c.dim(f"{hidden} merged branch(es) hidden -- show with --merged"))
+    if any(not b.exact and b.parent is not None for b in shown):
+        print()
+        print(c.dim("~ = diverged fork point; lineage inferred, not exact"))
+
+
+if __name__ == "__main__":
+    main()

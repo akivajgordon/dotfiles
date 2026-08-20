@@ -179,9 +179,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/akiva/.cache/lm-studio/bin"
+export PATH="$PATH:$HOME/.cache/lm-studio/bin"
 
 # Created by `pipx` on 2024-12-29 03:48:41
-export PATH="$PATH:/Users/akiva/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 export PATH="$HOME/bin:$PATH"

@@ -71,3 +71,8 @@ e = ["extend_to_line_bounds", ":append-output echo \"logger.error('$(date | md5 
 s = ":! ~/bin/testrunner.sh"
 f = ":! ~/bin/testrunner.sh \"%{buffer_name}\""
 p = ":! ~/bin/testrunner.sh --pick"
+
+# Move the private method under the cursor to the bottom of its class.
+# The LSP's extract-method drops new privates at the top; I want them last.
+[keys.normal.minus.m]
+m = "@mafdmi{o<esc>PO<esc>"
